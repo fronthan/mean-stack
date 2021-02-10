@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hello world!</title>
+    <link rel="stylesheet" href="/css/master.css">
+</head>
+
+<body>
+    <h1>Hello
+        <% if(name) { %>
+            <span class="name">
+                <%= name %>!
+            </span>
+            <% } else { %>
+                <span class="stranger">방문자님</span>
+                <% } %>
+    </h1>
+    <!-- ejs는 html에 js코드가 더해진 형태, 모든 js 코드는 <% %>에 들어가야 한다. 변수 출력시 '='을 붙인다 -->
+
+</body>
+
+</html>
