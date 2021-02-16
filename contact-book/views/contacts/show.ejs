@@ -7,23 +7,24 @@
 <body>
     <%- include('../partials/nav') %>
 
-    <div class="contact contact-show">
-        <h2>보기</h2>
-        <div class="show_wrap">
-            <h3><%= contact.name %></h3>
-            <div class="show_box">
-                <label>이메일</label>
-                <span class="show_txt"><%= contact.email %></span>
-            </div>
-            <div class="show_box">
-                <label>연락처</label>
-                <span class="show_txt"><%= contact.phone %></span>
+    <div class="contact contact-show container">
+        <h2><%= contact.name %></h2>
+        <div class="show_wrap card">
+            <div class="card-body">
+                <div class="show_box">
+                    <label>이메일</label>
+                    <span class="show_txt"><%= contact.email %></span>
+                </div>
+                <div class="show_box">
+                    <label>연락처</label>
+                    <span class="show_txt"><%= contact.phone %></span>
+                </div>
             </div>
         </div>
-        <div class="contact-menu">
-            <a href="/contacts/<%= contact._id %>/edit">수정하기</a>
+        <div class="contact-menu mt-2">
+            <a href="/contacts/<%= contact._id %>/edit" class="btn btn-light mr-2">수정하기</a>
             <form method="post" action="/contacts/<%= contact._id %>?_method=delete">
-                <a href="#" onclick="confirm('정말로 삭제할까요?') ? this.parentElement.submit():null;">삭제하기</a>
+                <a href="#" onclick="confirm('정말로 삭제할까요?') ? this.parentElement.submit():null;" class="btn btn-light">삭제하기</a>
             </form>
             <!-- delete는 폼으로 처리해야 한다. (a tag로는 get만 가능)
             form 에서도 post 밖에 안 되지만 method-override 패키지로 메소드 우회한다

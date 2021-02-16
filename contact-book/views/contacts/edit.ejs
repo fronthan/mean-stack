@@ -9,23 +9,23 @@
 <body>
     <%- include('../partials/nav') %>
 
-        <div class="contact contact-edit">
+        <div class="contact contact-edit container">
             <h2>수정하기</h2>
             <div class="edit_wrap">
                 <form action="/contacts/<%= contact._id %>?_method=put" method="post" class="contact-form">
-                    <div class="show_box">
+                    <div class="show_box form-group">
                         <label for="name">이름</label>
-                        <input type="text" id="name" name="name" class="name" value="<%= contact.name %>">
+                        <input type="text" id="name" name="name" class="name form-control" value="<%= contact.name %>">
                     </div>
-                    <div class="show_box">
+                    <div class="show_box form-group">
                         <label for="email">이메일</label>
-                        <input type="text" id="email" name="email" value="<%= contact.email %>">
+                        <input type="text" id="email" name="email" value="<%= contact.email %>" class="form-control"/>
                     </div>
-                    <div class="show_box">
+                    <div class="show_box form-group">
                         <label for="phone">연락처</label>
-                        <input id="phone" name="phone" value="<%= contact.phone %>">
+                        <input id="phone" name="phone" value="<%= contact.phone %>" class="form-control" s/>
                     </div>
-                    <button type="submit">전송</button>
+                    <button type="submit" class="btn btn-primary">전송</button>
                 </form>
             </div>
 <!-- new.ejs 와 비슷하지만 값이 미리 들어있고 form action이 put이다 -->

@@ -7,23 +7,23 @@
 <body>
     <%- include('../partials/nav') %>
 
-    <div class="contact contact-new">
+    <div class="contact contact-new container">
         <h2>New</h2>
         <form action="/contacts" method="post" class="contact-form">
-            <div class="input_box">
+            <div class="input_box form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" value="" />
+                <input type="text" id="name" name="name" value="" class="form-control"/>
             </div>
-            <div class="input_box">
+            <div class="input_box form-group">
                 <label for="email">Email</label>
-                <input type="text" id="email" name="email" value="" />
+                <input type="text" id="email" name="email" value="" class="form-control"/>
             </div>
-            <div class="input_box">
+            <div class="input_box form-group">
                 <label for="phone">Phone</label>
-                <input type="text" id="phone" name="phone" value="" />
+                <input type="text" class="form-control" id="phone" name="phone" value="" />
             </div>
             <div class="input_box">
-                <button type="submit">전송</button>
+                <button type="submit" class="btn btn-primary">전송</button>
             </div>
         </form>
     </div>

@@ -1,6 +1,15 @@
 .contact h2 {color:tomato}
 
+.container{
+  max-width: 500px;
+}
+
+
 .contact .contact-form label {
     display:inline-block;
     width:70px;
 }
+
+.contact .contact-menu form{
+    display: inline-block;
+  }
