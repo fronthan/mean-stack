@@ -1,0 +1,114 @@
+var express = require('express');
+var router = express.Router();
+var User = require('../models/User');
+
+// Index
+router.get('/', function(req, res) {
+    User.find({})
+    .sort({username:1})
+    .exec(function(err, users){
+        if(err) return res.json(err);
+        res.render('users/index', {users:users});
+    }); //찾은 값을 오름차순으로 정렬
+});
+
+// New
+router.get('/new', function(req, res) {
+    var user = req.flash('user')[0] || {};
+    var errors = req.flash('errors')[0] || {};
+    res.render('users/new', {user:user, errors:errors});
+});
+
+// create
+router.post('/', function(req, res) {
+    User.create(req.body, function(err, user) {
+        if(err) {
+            req.flash('user', req.body);
+            req.flash('errors', parseError(err));   
+            return res.redirect('/users/new');
+        }
+        res.redirect('/users');
+    });
+});
+
+// show
+router.get('/:username', function(req, res) {
+    User.findOne({username:req.params.username}, function(err, user) {
+        if(err) return res.json(err);
+        res.render('users/show', {user:user});
+    });
+});
+
+//edit
+router.get('/:username/edit', function(req, res) {
+    var user = req.flash('user')[0];//user 플래시값이 있으면 오류가 있을 때, 값이 없으면 처음 들어온 경우
+    var errors = req.flash('errors')[0] || {};
+
+    if(!user) {//user flash 값이 없다, 처음 들어온 경우
+        User.findOne({username:req.params.username}, function(err, user) {
+            if(err) return res.json(err);
+            res.render('users/edit', {username:req.params.username, user:user, errors:errors }); //flash 값이라면 username 이 달라질 수 있으므로 req.params.username으로 한다
+        });
+    } else {
+        res.render('users/edit', { username: req.params.username, user:user, errors:errors });
+    }
+});
+
+// Update
+router.put('/:username', function(req,res,next){
+    User.findOne({username: req.params.username})
+    .select('password')
+    .exec(function(err, user){
+        //useer model에서 password의 select를 false로 기본으로 설정했지만, select('password')가 있으니 true로 비번을 읽어오게 된다.
+        // 반대로 읽어오게 설정한 것을 안 읽어오게 할 수도 있는데 그것이 'select('-name')' 과 같이 하면 된다. 
+        if(err) return res.json(err);
+
+        // update user object
+        user.originalPassword = user.password;
+        user.password = req.body.newPassword ? req.body.newPassword : user.password; //비번을 수정했을 때와 하지 않았을 때 입력되는 값이 다르다
+
+        for(var p in req.body) {//user가 db에서 읽어온 값이고, req.body가 form에 입력된 새로운 값으로, 덮어쓴다
+            user[p] = req.body[p]
+        }
+
+        // save updated user
+        user.save(function(err, user) {
+            if(err) {
+                req.flash('user', req.body);
+                req.flash('errors',parseError(err));   
+                return res.redirect('/users/'+req.params.username+'/edit');
+            }
+            res.redirect('/users/'+user.username);
+        });
+    });
+});
+
+//destroy
+router.delete('/:username', function(req, res){
+    User.deleteOne({username:req.params.username}, function(err) {
+        if(err) return res.json(err);
+        res.redirect('/users')
+    });
+});
+
+module.exports = router;
+
+//function
+/*
+* mongoose 와 mongoDB에서 내는 에러 메시지 형태를 통일시킨다
+*/
+function parseError(errors) {
+    var parsed = {};
+    if(errors.name == 'ValidationError') {
+        for(var name in errors.errors) {
+            var validationError = errors.errors[name];
+            parsed[name] = { message: validationError.message };
+        }
+    } else if (errors.code == '11000' && errors.errmsg.indexOf('username') > 0 ) {
+        parsed.username = {message: '이미 로그아웃한 회원입니다.'}
+    } else {
+        parsed.unhandled = JSON.stringify(errors);
+    }
+
+    return parsed;
+}

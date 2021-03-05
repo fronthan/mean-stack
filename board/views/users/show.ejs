@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/nav') %>
+
+        <div class="container mb-3">
+            <h2 class="contentBoxTop">
+                <%= user.username %>
+            </h2>
+
+            <form action="/users" method="post" class="user-form">
+
+                <fieldset disabled>
+
+                    <div class="form-group row">
+                        <label for="name" class="col-sm-3 col-form-label">name</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="name" name="name" value="<%= user.name %>" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="email" class="col-sm-3 col-form-label">이메일</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="email" name="email" value="<%= user.email %>" class="form-control">
+                        </div>
+                    </div>
+
+                </fieldset>
+            </form>
+
+
+            <div>
+                <a href="/users" class="btn btn-primary">뒤로가기</a>
+                <a href="/users/<%= user.username %>/edit" class="btn btn-primary">수정하기</a>
+                <form action="/users/<%= user.username %>?_method=delete" method="post" class="d-inline">
+                    <a href="javascript:void(0)" onclick="confirm('정말로 탈퇴할까요?')?this.parentElement.submit():null;"
+                        class="btn btn-primary">탈퇴</a>
+                </form>
+            </div>
+        </div>
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body>
+    <%- include('../partials/nav') %>
+    
+    <div class="container mb-3">
+        <h2 class="mb-3">정보 수정</h2>
+
+        <form action="/users/<%= username %>?_method=put" method="post">
+            <!-- router 에서 받은 username을 사용한다 -->
+            <div class="form-group row">
+                <label for="currentPassword" class="col-sm-3 col-form-label">현재 비밀번호</label>
+                <div class="col-sm-9 col-sm-offset-3">
+                    <input type="password" name="currentPassword" id="currentPassword" value="" class="form-control <%= (errors.currentPassword)?'is-invalid':'' %>">
+                    <% if(errors.currentPassword) { %>
+                        <span class="invalid-feedback"><%= errors.currentPassword.message %></span>
+                    <% } %>
+                </div>
+            </div>
+            
+            <hr>
+
+            <div class="form-group row">
+                <label for="username" class="col-sm-3 col-form-label">username*</label>
+                <div class="col-sm-9">
+                    <input type="text" id="username" name="username" value="<%= user.username %>" class="form-control <%= (errors.username)?'is-invalid':'' %>">
+                    <% if(errors.username) { %>
+                        <span class="invalid-feedback"><%= errors.username.message %></span>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="name" class="col-sm-3 col-form-label">name*</label>
+                <div class="col-sm-9">
+                    <input type="text" id="name" name="name" value="<%= user.name %>" class="form-control <%= (errors.name)?'is-invalid':'' %>">
+                    <% if(errors.name) { %>
+                        <span class="invalid-feedback"><%= errors.name.message %></span>
+                    <%} %>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="email" class="col-sm-3 col-form-label">이메일</label>
+                <div class="col-sm-9">
+                    <input type="text" id="email" name="email" value="<%= user.email %>" class="form-control <%= (errors.email)?'is-invalid':'' %>">
+                    <% if(errors.email) { %>
+                        <span class="invalid-feedback"><%= errors.email.message %></span>
+                    <% } %>
+                </div>
+            </div>
+        
+            <div class="form-group row">
+                <label for="password" class="col-sm-3 col-form-label">새로운 비밀번호</label>
+                <div class="col-sm-9">
+                    <input type="text" id="password" name="password" value="" class="form-control <%= (errors.newPassword)?'is-invalid':'' %>">
+                    <% if(errors.newPassword) { %>
+                        <span class="invalid-feedback"><%= errors.newPassword.message %></span>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="passwordConfirmation" class="col-sm-3 col-form-label">비밀번호 확인</label>
+                <div class="col-sm-9 col-sm-offset-3">
+                    <input type="text" id="passwordConfirmation" name="passwordConfirmation" value="" class="form-control <%= (errors.passwordConfirmation)?'is-invalid':'' %>">
+                    <% if(errors.passwordConfirmation) { %>
+                        <span class="invalid-feedback"><%= errors.passwordConfirmation.message  %></span>
+                    <% } %>
+                </div>
+            </div>
+
+            <p>
+                <small>*필수항목</small>
+            </p>
+
+            <% if(errors.unhandled){ %>
+                <div class="alert alert-danger">
+                    <%= errors.unhandled %>
+                </div>
+            <% } %>
+
+            <div class="buttons">
+                <a href="/users/<%= user.username %>" class="btn btn-primary">뒤로가기</a>
+                <button type="submit" class="btn btn-primary">제출</button>
+            </div> 
+           
+        </form>
+    </div>
+</body>
+</html>

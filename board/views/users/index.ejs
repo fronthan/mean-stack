@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body>
+    <%- include('../partials/nav') %>
+    
+    <div class="container mb-3">
+        <h2 class="mb-3">Users</h2>
+
+        <ul class="list-group">
+            <% if(users ==null || users.length == 0) { %>
+                <li class="list-group-item">현재 회원이 없습니다.</li>
+            <% } %>
+            <% users.forEach(function(user) { %>
+                <li class="list-group-item">
+                    <a href="/users/<%= user.username %>"><%= user.username %></a>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+</html>
