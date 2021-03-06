@@ -14,14 +14,15 @@
             <table class="board-table table table-sm boader-bottom">
                 <thead class="thead-light">
                     <tr>
-                        <th scope="col">Title</th>
+                        <th scope="col">제목</th>
+                        <th scope="col">작성자</th>
                         <th scope="col">Date</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if(posts == null || posts.length == 0) { %>
                         <tr>
-                            <td colspan="2">데이터가 없습니다</td>
+                            <td colspan="3">데이터가 없습니다</td>
                         </tr>
                     <% } %>
                     <% posts.forEach(function(post) { %>
@@ -29,8 +30,13 @@
                             <td>
                                 <a href="/posts/<%= post._id %>"><div class="ellipsis"><%= post.title %></div></a>
                             </td>
+                            <td class="author">
+                                <div class="ellipsis">
+                                    <%= post.author ? post.author.username : "" %>
+                                </div>
+                            </td>
                             <td class="date">
-                                <span data-date="<%= post.createdAt %>"></span>
+                                <span data-date="<%= post.createdAt %>"><%= post.createdAt %></span>
                             </td>
                         </tr>
                         <% }) %>
@@ -38,7 +44,9 @@
             </table>
 
             <div>
+                <% if(isAuthenticated) { %>
                 <a href="/posts/new" class="btn btn-primary">New</a>
+                <% } %>
             </div>
         </div>
 </body>

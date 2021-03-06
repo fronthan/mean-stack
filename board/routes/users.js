@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/User');
+var util = require('../util');
 
+/*
 // Index
 router.get('/', function(req, res) {
     User.find({})
@@ -11,6 +13,7 @@ router.get('/', function(req, res) {
         res.render('users/index', {users:users});
     }); //찾은 값을 오름차순으로 정렬
 });
+*/
 
 // New
 router.get('/new', function(req, res) {
@@ -24,7 +27,7 @@ router.post('/', function(req, res) {
     User.create(req.body, function(err, user) {
         if(err) {
             req.flash('user', req.body);
-            req.flash('errors', parseError(err));   
+            req.flash('errors', util.parseError(err)); 
             return res.redirect('/users/new');
         }
         res.redirect('/users');
@@ -32,7 +35,7 @@ router.post('/', function(req, res) {
 });
 
 // show
-router.get('/:username', function(req, res) {
+router.get('/:username', util.isLoggedin, checkPermission, function(req, res) {
     User.findOne({username:req.params.username}, function(err, user) {
         if(err) return res.json(err);
         res.render('users/show', {user:user});
@@ -40,7 +43,7 @@ router.get('/:username', function(req, res) {
 });
 
 //edit
-router.get('/:username/edit', function(req, res) {
+router.get('/:username/edit', util.isLoggedin, checkPermission, function(req, res) {
     var user = req.flash('user')[0];//user 플래시값이 있으면 오류가 있을 때, 값이 없으면 처음 들어온 경우
     var errors = req.flash('errors')[0] || {};
 
@@ -55,7 +58,7 @@ router.get('/:username/edit', function(req, res) {
 });
 
 // Update
-router.put('/:username', function(req,res,next){
+router.put('/:username', util.isLoggedin, checkPermission, function(req,res,next){
     User.findOne({username: req.params.username})
     .select('password')
     .exec(function(err, user){
@@ -75,14 +78,15 @@ router.put('/:username', function(req,res,next){
         user.save(function(err, user) {
             if(err) {
                 req.flash('user', req.body);
-                req.flash('errors',parseError(err));   
-                return res.redirect('/users/'+req.params.username+'/edit');
+                req.flash('errors',util.parseError(err));   
+                return res.redirect('/users/'+req.params.username+'/edit'); //1
             }
             res.redirect('/users/'+user.username);
         });
     });
 });
 
+/*
 //destroy
 router.delete('/:username', function(req, res){
     User.deleteOne({username:req.params.username}, function(err) {
@@ -90,25 +94,16 @@ router.delete('/:username', function(req, res){
         res.redirect('/users')
     });
 });
+*/
 
 module.exports = router;
 
-//function
-/*
-* mongoose 와 mongoDB에서 내는 에러 메시지 형태를 통일시킨다
-*/
-function parseError(errors) {
-    var parsed = {};
-    if(errors.name == 'ValidationError') {
-        for(var name in errors.errors) {
-            var validationError = errors.errors[name];
-            parsed[name] = { message: validationError.message };
-        }
-    } else if (errors.code == '11000' && errors.errmsg.indexOf('username') > 0 ) {
-        parsed.username = {message: '이미 로그아웃한 회원입니다.'}
-    } else {
-        parsed.unhandled = JSON.stringify(errors);
-    }
+//private functions 2
+function checkPermission(req, res, next) {
+    User.findOne({username:req.params.username}, function(err, user){
+        if(err) return res.json(err);
+        if(user.id != req.user.id) return util.noPermission(req, res);
 
-    return parsed;
+        next();
+    });
 }

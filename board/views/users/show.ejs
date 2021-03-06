@@ -37,7 +37,9 @@
 
             <div>
                 <a href="/users" class="btn btn-primary">뒤로가기</a>
+                <% if(isAuthenticated && currentUseer.id == user.id) { %>
                 <a href="/users/<%= user.username %>/edit" class="btn btn-primary">수정하기</a>
+                <% } %>
                 <form action="/users/<%= user.username %>?_method=delete" method="post" class="d-inline">
                     <a href="javascript:void(0)" onclick="confirm('정말로 탈퇴할까요?')?this.parentElement.submit():null;"
                         class="btn btn-primary">탈퇴</a>
