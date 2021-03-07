@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var passport = require('../config/passport'); //index.js에서만 require 해도 된다
+var passport = require('../config/passport');
 
 //Home
 router.get('/', function(req, res){
@@ -10,7 +10,7 @@ router.get('/about', function(req, res){
     res.render('home/about')
 });
 
-// Login 뷰 라우터
+// Login get 라우터
 router.get('/login', function(req, res) {
     var username = req.flash('username')[0];
     var errors = req.flash('errors')[0] || {};
@@ -20,7 +20,7 @@ router.get('/login', function(req, res) {
     })
  });
 
- // Post Login 
+ // Login Post 라우터
  router.post('/login', function(req, res, next) {//콜백1은 form의 validation을 위한 것, 에러가 있으면 flash를 만들고 login view로 이동
     var errors = {};
     var isValid = true;

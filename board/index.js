@@ -4,8 +4,9 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var flash = require('connect-flash');
 var session = require('express-session');
-var passport = require('./config/passport'); //config/passport 라는 것에 주의
+var passport = require('./config/passport'); //nodemodules에서 가져오는 게 아니라 config/passport 라는 것에 주의
 var app = express();
+//var ejsLint = require('ejs-lint');
 
 //DB setting
 mongoose.set('useNewUrlParser', true);

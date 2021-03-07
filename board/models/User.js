@@ -90,7 +90,7 @@ userSchema.pre('save', function(next) {//save 가 되기 전에 발생하는 함
 //model methods 
 userSchema.methods.authenticate = function(password) {
     var user = this;
-    return bcrypt.compareSync(password,user.password);
+    return bcrypt.compareSync(password, user.password);
 }
 
 //model & export

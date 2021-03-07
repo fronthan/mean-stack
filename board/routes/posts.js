@@ -4,14 +4,30 @@ var Post = require('../models/Post');
 var util = require('../util');
 
 //Index
-router.get('/', function(req, res){
-    Post.find({})
+router.get('/', async function(req, res){
+    var page = Math.max(1, parseInt(req.query.page));//query string은 문자열로 전달되기 때문에, 숫자가 아닐 경우를 위해 소수점까지 없애는 parseInt 사용한다
+    var limit = Math.max(1, parseInt(req.query.limit)); //Page, limit은 양수이어야 하고, 최소 1이어야 하므로 math.max함수를 사용
+    page = !isNaN(page)?page:1; //정수로 변환될 수 없는 값이 올 경우 기본값 설정
+    limit = !isNaN(limit)?limit:10; //쿼리스트링이 없는 경우에도 사용한다. 
+
+    var skip = (page-1)*limit; //무시할 게시물의 수를 담는다. (현재 페이지를 표현하는 방법)
+    var count = await Post.countDocuments({});// {}는 조건이 없음, 모든 post의 수를 db에서 읽어온다. 
+    var maxPage = Math.ceil(count/limit); //전체 페이지 수, 한 페이지당 표시될 게시물 갯수와 전체 게시물 수를 이용해 계산
+    var posts = await Post.find({})
     .populate('author') //model.populate()함수 : relationship이 형성돼있는 항목의 값을 생성한다 
     .sort('-createdAt')
-    .exec(function(err, posts){
-        if(err) return res.json(err);
-        res.render('posts/index', {posts:posts});
+    .skip(skip) 
+    .limit(limit)
+    .exec(); //await를 사용하면 Post.find({})를 변수에 담을 수 있다. 
+//skip: 일정한 수만큼 검색된 결과를 무시하는 함수
+//limit: 일정한 수만큼만 검색된 결과를 보여주는 함수
+    res.render('posts/index',{//view/posts/index로 전달해 post 페이지를 정상적으로 보여줄 수 있다. 
+        posts:posts,
+        currentPage:page,
+        maxPage:maxPage,
+        limit:limit
     });
+    
     /*
     * 나중에 생성됝 데이터가 위로 오게 정렬한다
     * 원래 모양은
@@ -75,7 +91,7 @@ router.put('/:id', util.isLoggedin, checkPermission, function(req, res){
             req.flash('errors', util.parseError(err));
             return res.redirect('/posts/'+req.params.id+'/edit');
         }
-        res.redirect("/posts/"+req.params.id)
+        res.redirect('/posts/'+req.params.id);
     });
 });
 
@@ -98,3 +114,4 @@ function checkPermission(req, res, next) {
         next();
     });
 }
+
