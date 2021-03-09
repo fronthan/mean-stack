@@ -12,7 +12,6 @@ router.get('/', async function(req, res){
     page = !isNaN(page)?page:1; //정수로 변환될 수 없는 값이 올 경우 기본값 설정
     limit = !isNaN(limit)?limit:10; //쿼리스트링이 없는 경우에도 사용한다. 
     
-    
     var skip = (page-1)*limit; //무시할 게시물의 수를 담는다. (현재 페이지를 표현하는 방법)
     /*var count = await Post.countDocuments({});// {}는 조건이 없음, 모든 post의 수를 db에서 읽어온다. */
     var maxPage = 0;
@@ -70,7 +69,7 @@ router.post('/', util.isLoggedin, function(req, res){
             //이 새로운 게시물 작성에서는 무조건 쿼리스트링에 추가되는게 아니라(isAppended=false) 파라미터 전달 없이 호출한다. 
         }
         //post의 route에서 redirect가 있는 경우, query string을 계속 유지하도록 해당 route로 page, limit query string을 view에서 전달해줘야 한다 
-        res.redirect('/posts'+res.locals.getPostQueryString(false, {page:1})); // 새글을 작성한 후 무조건 첫번째 page를 보여주도록 overwrite를 해준다. 
+        res.redirect('/posts'+res.locals.getPostQueryString(false, {page:1, searchText:'' })); // 새글을 작성한 후 무조건 첫번째 page를 보여주도록 overwrite를 해준다. 
         
     });
 });

@@ -1,4 +1,7 @@
 $(function(){
+    /* ---------------------
+    * 일반 단위, 시간 표시 변환 함수들    
+     ----------------------- */
     function get2digits(num) {
         return('0' +num).slice(-2)
     }
@@ -39,13 +42,13 @@ $(function(){
     convertDateTime();
 
     
-    /* *********************** 
-    ********  검색관련 **********
-    ************************** */
+    /* ---------- 
+    *  검색관련 
+     ----------- */
     var search = window.location.search; //query String 정보가 들어있다 -> ?searchType=title&searchText=text 의 형태
     var params = {};
 
-    if(search) {//위의 search 값을 query string 오브젝트로 바꿔준다
+    if(search) {//위의 search 값을 query string 오브젝트로 바꿔준다 (IE를 위한 조치)
         $.each(search.slice(1).split('&'), function(index,param) {
             var index = param.indexOf('=');
 
@@ -58,11 +61,11 @@ $(function(){
         });
     }
 
-    if(params.searchText && params.searchText.length >=3 ) {
+    if(params.searchText && params.searchText.length>=3 ) {
         $('[data-search-highlight]').each(function(index, element) {// $this 값을 searchType과 비교해 일치하는 경우 searchText를 regex로 찾아 해당 글자에 하이라이트 클래스 추가한다 
             var $element = $(element);
             var searchHighlight = $element.data('search-highlight');
-            var index = params.serachType.indexOf(searchHighlight);
+            var index = params.searchType.indexOf(searchHighlight);
 
             if(index >= 0) {
                 var decodedSearchText = params.searchText.replace(/\+/g, ' '); //searchText에 공백이 있는 경우, query string으로 '+' 문자가 삽입되므로 ''으로 치환해준다.
