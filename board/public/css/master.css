@@ -38,3 +38,20 @@ body {
   .board-table .date {
     width: 100px;
   }
+
+
+.post-index-tool {
+  max-width: 450px;
+}
+.post-index-tool input[type='text']{
+  max-width: 130px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+.post-body,
+.comment-text {
+  white-space: pre-line;
+}

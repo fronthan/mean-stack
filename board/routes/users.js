@@ -15,6 +15,7 @@ router.get('/', function(req, res) {
 });
 */
 
+
 // New
 router.get('/new', function(req, res) {
     var user = req.flash('user')[0] || {};
@@ -50,10 +51,10 @@ router.get('/:username/edit', util.isLoggedin, checkPermission, function(req, re
     if(!user) {//user flash 값이 없다, 처음 들어온 경우
         User.findOne({username:req.params.username}, function(err, user) {
             if(err) return res.json(err);
-            res.render('users/edit', {username:req.params.username, user:user, errors:errors }); //flash 값이라면 username 이 달라질 수 있으므로 req.params.username으로 한다
+            res.render('users/edit', {username:req.params.username, user:user, errors:errors });
         });
     } else {
-        res.render('users/edit', { username: req.params.username, user:user, errors:errors });
+        res.render('users/edit', { username: req.params.username, user:user, errors:errors });//flash에 입력된 user[0]의 값이 잘못 수정되었을 수도 있으므로 params에서 username을 가져온다
     }
 });
 
@@ -68,9 +69,9 @@ router.put('/:username', util.isLoggedin, checkPermission, function(req,res,next
 
         // update user object
         user.originalPassword = user.password;
-        user.password = req.body.newPassword ? req.body.newPassword : user.password; //비번을 수정했을 때와 하지 않았을 때 입력되는 값이 다르다
+        user.password = req.body.newPassword ? req.body.newPassword : user.password; //비번을 수정했을 때는 새로운 값을, 수정하지 않았을 때는 기존 값을 password 항목에 넣는다
 
-        for(var p in req.body) {//user가 db에서 읽어온 값이고, req.body가 form에 입력된 새로운 값으로, 덮어쓴다
+        for(var p in req.body) {//user가 db에서 읽어온 값이고, req.body가 form에 입력된 새로운 값으로, user데이터에 덮어쓴다
             user[p] = req.body[p]
         }
 

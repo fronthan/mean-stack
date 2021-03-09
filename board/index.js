@@ -5,6 +5,7 @@ var methodOverride = require('method-override');
 var flash = require('connect-flash');
 var session = require('express-session');
 var passport = require('./config/passport'); //nodemodules에서 가져오는 게 아니라 config/passport 라는 것에 주의
+var util = require('./util'); // 1
 var app = express();
 //var ejsLint = require('ejs-lint');
 
@@ -51,8 +52,9 @@ app.use(function(req, res, next) {
 
 //Routes
 app.use('/', require('./routes/home'));
-app.use('/posts', require('./routes/posts'));
+app.use('/posts', util.getPostQueryString, require('./routes/posts')); //post route이 req되기 전에 배치하여 모든 post routes에서 사용할 수 있게 한다 
 app.use('/users', require('./routes/users'));
+app.use('/comments', util.getPostQueryString, require('./routes/comments'));
 
 //Port setting
 var port = 3000;
