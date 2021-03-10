@@ -62,6 +62,8 @@ router.get('/', async function(req, res){
                 author: {
                     username: 1
                 },
+                views:1,
+                numId:1,
                 createdAt : 1,
                 commentCount: { $size: '$comments'} //댓글의 수를 가져온다
             }}
@@ -123,6 +125,8 @@ router.get('/:id', function(req, res){
         Comment.find({post:req.params.id}).sort('createdAt').populate({path:'author', select:'username'})
     ])
     .then(([post, comments]) => {// comment 모델을 tree 구조로 변환하고 post show view에 전달한다.
+        post.views++;
+        post.save();
         var commentTrees = util.convertToTrees(comments, '_id', 'parentComment', 'childComments');
         res.render('posts/show', {post:post, commentTrees:commentTrees, commentForm:commentForm, commentError:commentError });
     })

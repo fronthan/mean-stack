@@ -14,19 +14,22 @@
         <table class="board-table table table-sm boader-bottom">
             <thead class="thead-light">
                 <tr>
+                    <th scope="col" class="numId">#</th>
                     <th scope="col">제목</th>
-                    <th scope="col">작성자</th>
-                    <th scope="col">Date</th>
+                    <th scope="col" class="views">조회</th>
+                    <th scope="col" class="author">작성자</th>
+                    <th scope="col" class="date">Date</th>
                 </tr>
             </thead>
             <tbody>
                 <% if(posts==null || posts.length==0) { %>
                     <tr>
-                        <td colspan="3">데이터가 없습니다</td>
+                        <td colspan="5">게시물이 없습니다</td>
                     </tr>
                 <% } %>
                 <% posts.forEach(function(post) { %>
                     <tr>
+                        <td class="numId"><%= post.numId %></td>
                         <td>
                             <!-- view에서 res.locals의 항목들을 바로 사용할 수 있기 때문에 그냥 getPostQueryString으로 호출한다 -->
                             <a href="/posts/<%= post._id %><%= getPostQueryString() %>" class="title-container">
@@ -38,6 +41,7 @@
                                 <% }%>
                             </a>
                         </td>
+                        <td class="views"><%= post.views %></td>
                         <td class="author">
                             <a href="/posts<%= getPostQueryString(false, {searchType: 'author!', searchText:post.author.username }) %>">
                                 <div data-search-highlight="author" class="ellipsis">
