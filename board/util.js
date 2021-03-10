@@ -62,4 +62,34 @@ util.getPostQueryString = function(req, res, next) {//req.query로 전달받은 
 * res.locals에 추가된 변수나 함수는 view에서 바로 사용할 수 있고,
 * res.locals.getPostQueryString의 형식으로 route에서도 사용할 수 있게 된다. 
 */
+
+util.convertToTrees = function(array, idFieldName, parentIdFieldName, childrenFieldName) {
+    var cloned = array.slice();
+
+    for(var i=cloned.length-1; i>=1; i--) {
+        var parentId = cloned[i][parentIdFieldName];
+
+        if(parentId) {
+            var filtered = array.filter(function(elem) {
+                return elem[idFieldName].toString() == parentId.toString();
+            });
+
+            if(filtered.length) {
+                var parent = filtered[0];
+
+                if(parent[childrenFieldName]) {
+                    parent[childrenFieldName].push(cloned[i]);
+                } else {
+                    parent[childrenFieldName] = [cloned[i]];
+                }
+            }
+
+            cloned.splice(i,1);
+        }
+    }
+
+    return cloned;
+}
+
+
 module.exports = util;

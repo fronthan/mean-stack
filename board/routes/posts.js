@@ -76,8 +76,7 @@ router.post('/', util.isLoggedin, function(req, res){
 
 
 //show
-/*
-댓글은 게시물과 함께 post>show 뷰에 표시된다. 즉 show route는 하나의 게시물과 모든 댓글들을 모두 읽어온 후 렌더링해야 한다.
+/* 댓글은 게시물과 함께 post>show 뷰에 표시된다. 즉 show route는 하나의 게시물과 모든 댓글들을 모두 읽어온 후 렌더링해야 한다.
 * DB에서 2개 이상의 데이터를 가져와야 하는 경우 Promise.all 함수를 사용한다.
 * Promise.all함수 : Promise 배열을 인자로 받고, 전달받은 모든 프라미스들이 resolve될 때까지 기다렸다가 데이터들을 같은 순서의 배열로 만들어 다음 콜백으로 전달한다
 //그래서 아래 then() 안의 배열이 post, comments 순서가 된다. 
@@ -90,8 +89,9 @@ router.get('/:id', function(req, res){
         Post.findOne({_id:req.params.id}).populate({path:'author', select:'username'}),
         Comment.find({post:req.params.id}).sort('createdAt').populate({path:'author', select:'username'})
     ])
-    .then(([post, comments]) => {
-        res.render('posts/show', {post:post, comments:comments, commentForm:commentForm, commentError:commentError });
+    .then(([post, comments]) => {// comment 모델을 tree 구조로 변환하고 post show view에 전달한다.
+        var commentTrees = util.convertToTrees(comments, '_id', 'parentComment', 'childComments');
+        res.render('posts/show', {post:post, commentTrees:commentTrees, commentForm:commentForm, commentError:commentError });
     })
     .catch((err) => {
         console.log('err: ', err);

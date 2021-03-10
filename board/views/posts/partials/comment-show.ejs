@@ -1,0 +1,76 @@
+<!-- 
+    post
+    comment
+    commentForm
+    commentError
+ -->
+
+
+<div class="border-top pt-1 pb-1">
+    <% if(comment.isDeleted) { %>
+        <div class="text-muted p-2">삭제된 댓글입니다</div>
+    <% } else { %>
+        <div class="row">
+            <div class="col-3 col-md-2 col-lg-1 pl-4"><%= comment.author.username %></div>
+            <div id="comment-<%= comment._id %>" class="col-9 col-md-10 col-lg-11 <%= (commentError._id == comment._id)?'comment-edit-enabled':'' %>">
+                <!-- commentError._id를 통해 에러를 가진 id값을 확인해 페이지 로딩 후 수정 form을 바로 볼 수 있다 -->
+                <div class="comment-show">
+                    <div class="comment-text mb-3"><%= comment.text %></div>
+                    <small class="d-block">
+                        Created: <span data-date-time="<%= comment.createdAt %>"></span>
+                        <% if(comment.updatedAt) { %>
+                            | Updated: <span data-date-time="<%= comment.updatedAt %>"></span>
+                        <% } %>
+                    </small>
+                    <% if(isAuthenticated) { %>
+                        <!-- reply 버튼은 로그인한 유저에게 보이도록 한다 -->
+                        <small class="d-block">
+                            <a href="javascript:void(0)" onclick="$('.comment-reply-enabled').removeClass('comment-reply-enabled'); $('.comment-edit-enabled').removeClass('.comment-edit-enabled'); $('#comment-<%= comment._id %>').addClass('comment-reply-enabled')">reply</a>
+                            <% if(comment.author && currentUser.id == comment.author.id) { %>
+                                <!-- 수정, 삭제 버튼은 작성자 유저만 보이도록 한다 -->                            
+                            |
+                            <a href="javascript:void(0)" onclick="$('.comment-reply-enabled').removeClass('comment-reply-enabled'); $('.comment-edit-enabled').removeClass('.comment-edit-enabled'); $('#comment-<%= comment._id %>').addClass('comment-edit-enabled')">Edit</a>
+                            <form action="/comments/<%= comment._id %>?postId=<%= post._id %>&_method=delete<%= getPostQueryString(true) %>" method="post" class="d-inline">
+                                <a href="javascript:void(0)" onclick="confirm('댓글을 삭제할까요?')?this.parentElement.submit():null;">Delete</a>
+                            </form>
+                            <% } %>
+                        </small>
+                    <% } %>
+                </div>
+                <div class="comment-edit">
+                    <%- include('./partials/comment-form', { 
+                        actionUrl: '/comments/' + comment._id + '?postId=' + post._id + '&_method=put',
+                        comment:comment,
+                        commentForm:commentForm,
+                        commentError:commentError
+                    }); %>
+                </div>
+                <!-- 실제 edit form을 분리한다. 위처럼 include('view코드위치', 데이터)의 형태로 하위 view에 데이터를 전달할 수 있다. -->
+
+                <div class="comment-reply">
+                    <%- include('comment-form', {
+                        actionUrl:'/comments?postId='+ post._id,
+                        comment: {},
+                        commentForm: commentForm,
+                        commentError: commentError,
+                        parentComment:comment._id
+                    });%>
+                </div>
+            </div>
+        </div>
+    <% }%>
+
+    <div class="ml-3">
+        <!-- 대댓글들을 comment-show로 분리 -->
+        <% if(comment.childComments) { %>
+            <% comment.childComments.forEach(function(childComment) { %>
+                <%- include('comment-show', {
+                    post:post,
+                    comment:childComment,
+                    commentForm:commentForm,
+                    commentError:commentError
+                });%>
+            <% }); %>
+        <% } %>
+    </div>
+</div>

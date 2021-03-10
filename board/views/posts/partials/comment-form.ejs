@@ -1,0 +1,42 @@
+<!-- 
+actionUrl : 댓글 수정과 생성 모두에 사용될 수 있기 때문에 용도에 맞는 action Url이 전달돼야 한다
+comment : 댓글 수정의 경우 원 댓글의 정보가 전달된다
+commentForm : 에러가 있는 경우 commentForm flash정보가 전달된다
+commentError : 상동
+parentComment
+-->
+
+
+<form action="<%= actionUrl %><%= getPostQueryString(true) %>" method="post">
+    <fieldset <%= !isAuthenticated?'disabled':'' %>>
+        <!-- fieldset isAuthenticated로 로그인한 사람만 댓글 작성할 수 있다 -->
+        <% if(parentComment) { %>
+            <!-- parentComment 가 전달되면, form 에 히든 인풋이 추가된다. form 전송 시 데이터를 전달하게 한다 -->
+            <input type="hidden" name="parentComment" value="<%= parentComment%>">
+        <% } %>
+        <div class="row">
+            <div class="col-8">
+                <!-- 에러 메시지가 현재 form에 적용되는지 알 수 있다  -->
+                <textarea name="text" rows="2" class="form-control <%= (commentError._id == comment._id && commentError.parentComment == parentComment && commentError.errors.text)?'is-invalid':'' %>"><%= (commentForm._id == comment._id)?commentForm.form.text:comment.text %></textarea>
+                <!-- 댓글 생성의 경우 comment._id 값이 없고, 수정의 경우 _id 값이 들어있다. commentError 와 commentForm도 생성의 경우 id값이 없고 수정에 경우 id가 _id에 들어있다. 그래서 위 구문으로 생성과 수정을 나눈다 -->
+            </div>
+            <div class="col-4">
+                <% if(comment._id) { %>
+                    <button class="btn btn-primary h-100 mr-2 pl-4 pr-4">Edit</button>
+                    <a href="javascript:void(0)" onclick="$('#comment-<%= comment._id %>').removeClass('comment-edit-enabled')">Cancel</a>
+                <% } else if (parentComment) { %>
+                    <!-- comment._id가 없고, parentComment가 있는 경우 대댓글 버튼과 취소 문구를 보여준다 -->
+                    <button type="submit" class="btn btn-primary h-100 mr-2">Add Reply</button>
+                    <a href="javascript:void(0)" onclick="$('#comment-<%= parentComment %>').removeClass('comment-reply-enabled')">Cancel</a>
+                <% } else { %>
+                <button type="submit" class="btn btn-primary h-100 mr-2">작성</button>
+                <% } %>
+            </div>
+        </div>
+        <% if(commentError._id == comment._id && commentError.parentComment == parentComment && commentError.errors.text) { %>
+            <span class="invalid-feedback d-block">
+                <%= commentError.errors.text.message %>
+            </span>
+        <% } %>
+    </fieldset>                    
+</form>
