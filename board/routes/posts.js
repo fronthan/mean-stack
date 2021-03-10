@@ -22,12 +22,50 @@ router.get('/', async function(req, res){
         var count = await Post.countDocuments(searchQuery); //전체 게시물 수와 게시물을 구한다. searchQuery가 있는 경우에만 post 검색하도록  제한한다
         maxPage = Math.ceil(count/limit); //전체 페이지 수, 한 페이지당 표시될 게시물 갯수와 전체 게시물 수를 이용해 계산
 
-        posts = await Post.find(searchQuery)
-            .populate('author')
-            .sort('-createdAt')            
-            .skip(skip)
-            .limit(limit)
-            .exec();
+        /* aggregate 댓글수 작업 이전 코드
+        // posts = await Post.find(searchQuery)
+        //     .populate('author')
+        //     .sort('-createdAt')            
+        //     .skip(skip)
+        //     .limit(limit)
+        //     .exec();
+        * 나중에 생성된 데이터가 위로 오게 정렬한다
+        * 원래 모양은
+        * 모델.find({}).exec(function(err, posts){...})
+        * sort() 함수는 string or object를 받아서 데이터 정렬 방법을 정의하고, 문자열로 항목명을 넣으면 오름차순으로 정렬하고, 내림차순인 경우 '-'를 앞에 붙인다.. 두 가지 이상의 조건으로 정렬한다면 빈칸을 넣고 항목을 적는다. object를 넣는 경우 {createdAt:1} (오름차순), {createdAt:-1}(내림차순) 이런 식으로 적는다
+        */
+         
+        /* model간 연결 시 Populate를 사용하지만, post에는 comment의 정보가 없기 때문에 comment를 읽어올 수 없다
+        * 그래서 mongoose의 aggregate()함수로 모델에 대한 aggregation을 mongodb로 전달 
+        * collection_name.aggregate([query obj1, query obj2, query obj3 ...]) */
+        posts = await Post.aggregate([//mongoDB의 aggregation 문서 참조
+            { $match: searchQuery }, //모델.find() 함수와 동일
+            { $lookup: { //컬렉션과 컬렉션을 이어준다. 아래 4가지는 필수값
+                from: 'users', //다른 컬렉션 이름
+                localField: 'author', //현재 컬렉션의 항목
+                foreignField: '_id', // 다른 컬렉션의 가져올 항목
+                as: 'author' //다른 컬렉션을 담을 항목 이름, 이 이름으로 다른 컬렉션의 데이터가 생성된다
+            }},//post.author의 값을 가지는 user._id 들을 모두 찾아 post.author 로 덮어쓴다. (배열, 1개도 없으면 빈배열)
+            { $unwind: '$author'}, //배열을 flat하게. ($lookup-배열로 가져왔으므로)
+            //aggregate에서 값으로 $가 사용되면, 현재 document의 항목을 나타낸다
+            { $sort: { createdAt: -1}}, //aggregate함수 안에서는 sort를 : -1 의 형태로만 사용 가능하다
+            { $skip: skip},
+            { $limit: limit },
+            { $lookup: {//comments.post의 값을 가지는 post._id를 모두 찾아 comments라는 이름으로 저장한다
+                from:'comments',
+                localField: '_id',
+                foreignField:'post',
+                as:'comments'
+            }},
+            { $project: { //데이터를 원하는 형태로 가공한다. 값으로 들어가는 1은 보여주기 원하는 항목을 나타낸다. (_id는 숨길 수 없다)
+                title: 1,
+                author: {
+                    username: 1
+                },
+                createdAt : 1,
+                commentCount: { $size: '$comments'} //댓글의 수를 가져온다
+            }}
+        ]).exec();
     }
     
     //model.populate()함수 : relationship이 형성돼있는 항목의 값을 생성한다 
@@ -43,12 +81,7 @@ router.get('/', async function(req, res){
         searchText:req.query.searchText
     });//view/posts/index로 전달해 post 페이지를 정상적으로 보여줄 수 있다. 
     
-    /*
-    * 나중에 생성됝 데이터가 위로 오게 정렬한다
-    * 원래 모양은
-    * 모델.find({}).exec(function(err, posts){...})
-    * sort() 함수는 string or object를 받아서 데이터 정렬 방법을 정의하고, 문자열로 항목명을 넣으면 오름차순으로 정렬하고, 내림차순인 경우 '-'를 앞에 붙인다.. 두 가지 이상의 조건으로 정렬한다면 빈칸을 넣고 항목을 적는다. object를 넣는 경우 {createdAt:1} (오름차순), {createdAt:-1}(내림차순) 이런 식으로 적는다
-    */
+   
 });
 
 //New
@@ -94,7 +127,6 @@ router.get('/:id', function(req, res){
         res.render('posts/show', {post:post, commentTrees:commentTrees, commentForm:commentForm, commentError:commentError });
     })
     .catch((err) => {
-        console.log('err: ', err);
         return res.json(err);
     });
 });

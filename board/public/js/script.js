@@ -78,4 +78,33 @@ $(function(){
             }
         });
     }
+
+
+    /* ------------------------------------------------------------
+     게시물의 제목이 아주 긴 경우 댓글의 수를 '...'다음에 표시해주기 위한 코드
+     ------------------------------------------------------------ */
+     function resetTitleEllipsisWidth() {
+         $('.board-table .title-text').each(function(i, e) {
+             var $text = $(e);
+             var $ellipsis = $(e).closest('.title-ellipsis');
+             var $comment = $(e).closest('.title-container').find('.title-comments');
+
+             var textWidth = $text.width();
+             var ellipsisWidth = $ellipsis.outerWidth();
+             var commentWidth = $comment.outerWidth();
+             var padding = 1;
+
+             if (ellipsisWidth <= (textWidth + commentWidth + padding)) {
+                 $ellipsis.width(ellipsisWidth - (commentWidth+padding));
+             } else {
+                 $ellipsis.width(textWidth + padding);
+             }
+         });
+     }
+
+     $(window).resize(function(){
+         $('.board-table .title-ellipsis').css('width','');
+         resetTitleEllipsisWidth();
+     });
+     resetTitleEllipsisWidth();
 }); //jQB

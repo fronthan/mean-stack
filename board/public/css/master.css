@@ -16,8 +16,13 @@ body {
   .board-table {
     table-layout: fixed;
   }
-  .board-table .date {
+  .board-table .date, .board-table .author {
     width: 100px;
+  }
+
+  .board-table .title-container:hover .title-comments,
+  .board-table .title-container:hover .title-text {
+    text-decoration: underline
   }
   
   .post-body{

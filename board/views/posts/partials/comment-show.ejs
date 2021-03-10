@@ -38,17 +38,18 @@
                     <% } %>
                 </div>
                 <div class="comment-edit">
-                    <%- include('./partials/comment-form', { 
+                    <%- include('./comment-form', { 
                         actionUrl: '/comments/' + comment._id + '?postId=' + post._id + '&_method=put',
                         comment:comment,
                         commentForm:commentForm,
-                        commentError:commentError
+                        commentError:commentError,
+                        parentComment:null
                     }); %>
                 </div>
                 <!-- 실제 edit form을 분리한다. 위처럼 include('view코드위치', 데이터)의 형태로 하위 view에 데이터를 전달할 수 있다. -->
 
                 <div class="comment-reply">
-                    <%- include('comment-form', {
+                    <%- include('./comment-form', {
                         actionUrl:'/comments?postId='+ post._id,
                         comment: {},
                         commentForm: commentForm,
@@ -64,7 +65,7 @@
         <!-- 대댓글들을 comment-show로 분리 -->
         <% if(comment.childComments) { %>
             <% comment.childComments.forEach(function(childComment) { %>
-                <%- include('comment-show', {
+                <%- include('./comment-show', {
                     post:post,
                     comment:childComment,
                     commentForm:commentForm,
