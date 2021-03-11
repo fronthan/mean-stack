@@ -1,8 +1,6 @@
-//function
 /*
 * mongoose 와 mongoDB에서 내는 에러 메시지 형태를 통일시킨다
 */
-
 var util = {};
 
 util.parseError = function(errors) {
@@ -91,5 +89,12 @@ util.convertToTrees = function(array, idFieldName, parentIdFieldName, childrenFi
     return cloned;
 }
 
+util.bytesToSize = function(bytes) {//파일의 사이즈가 byte로 file 모델에 저장되므로 단위를 변환해주는 함수
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+
+    if(bytes == 0) return '0 Bytes';
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+}
 
 module.exports = util;

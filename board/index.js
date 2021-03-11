@@ -5,9 +5,8 @@ var methodOverride = require('method-override');
 var flash = require('connect-flash');
 var session = require('express-session');
 var passport = require('./config/passport'); //nodemodules에서 가져오는 게 아니라 config/passport 라는 것에 주의
-var util = require('./util'); // 1
+var util = require('./util');
 var app = express();
-//var ejsLint = require('ejs-lint');
 
 //DB setting
 mongoose.set('useNewUrlParser', true);
@@ -46,7 +45,7 @@ app.use(passport.session()); //passport를 session과 연결해주는 함수
 app.use(function(req, res, next) {
     res.locals.isAuthenticated = req.isAuthenticated(); //isAuthenticated()는 passport에서 제공하는 함수로, 현재 로그인 여부를 true, false로 반환해준다
     res.locals.currentUser = req.user; //passport에서 추가하는 항목으로 로그인이 되면 session으로부터 user를 deserialize해 생성된다 (~currentUser는 로그인된 user의 정보를 불러오는 데 사용)
-    // res.locals에 담겨진 변수는 ejs에서 바로 사용 가능하다 
+    res.locals.util = util; // res.locals에 담겨진 변수는 ejs에서 바로 사용 가능하다.
     next();
 });
 
@@ -55,6 +54,7 @@ app.use('/', require('./routes/home'));
 app.use('/posts', util.getPostQueryString, require('./routes/posts')); //post route이 req되기 전에 배치하여 모든 post routes에서 사용할 수 있게 한다 
 app.use('/users', require('./routes/users'));
 app.use('/comments', util.getPostQueryString, require('./routes/comments'));
+app.use('/files', require('./routes/files'));
 
 //Port setting
 var port = 3000;

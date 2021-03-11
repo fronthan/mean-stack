@@ -36,10 +36,14 @@
                                 <div data-search-highlight="title" class="ellipsis title-ellipsis float-left">
                                     <span class="title-text"><%= post.title %></span>
                                 </div>
+                            </a>
                                 <% if(post.commentCount) { %>
                                     <small class="title-comments d-inline-block pl-2">(<%= post.commentCount %>)</small>
                                 <% }%>
-                            </a>
+                                <% if(post.attachment) { %>
+                                    <small class="title-attachment d-inline-block pl-2">📁</small>
+                                <% } %>
+                            
                         </td>
                         <td class="views"><%= post.views %></td>
                         <td class="author">

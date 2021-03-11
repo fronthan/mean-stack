@@ -1,8 +1,11 @@
 var express = require('express');
 var router = express.Router();
+var multer = require('multer');
+var upload = multer({dest:'uploadedFiles/'}); //multer를 이용해 파일이 저장될 위치를 설정한다
 var Post = require('../models/Post');
 var User = require('../models/User'); //username 으로 해당 user를 DB에서 찾고, id를 author로 가지는 post를 찾는 방식으로 작성자를 검색하기 위해서
 var Comment = require('../models/Comment');
+var File = require('../models/File');
 var util = require('../util');
 
 //Index
@@ -57,6 +60,19 @@ router.get('/', async function(req, res){
                 foreignField:'post',
                 as:'comments'
             }},
+            { $lookup : {//files._id의 값을 가지는 _id.attchment를 찾아 attachment라는 이름으로 저장한다
+                from:'files',
+                localField:'attachment',
+                foreignField: '_id',
+                as:'attachment'
+            }},
+            { $unwind: {//2
+                path: '$attachment',
+                preserveNullAndEmptyArrays: true
+                }
+                //unwind는 배열을 플랫하게 풀어주는 대신에, 배열의 수만큼 오브젝트를 생성한다. author는 모든 post에 반드시 존재하므로, 단순히 unwind하면 되지만
+                // 첨부파일은 몇 개일지 알 수 없다. 첨부파일이 없는 post는 unwind하면 $lookup으로 생성된 attachment 배열의 길이가 0이므로, 해당 post가 사라진다. 배열의 길이가 0이거나 배열이 없는 항목을 unwind 하는 경우 기존 오브젝트를 삭제하지 않도록 하는 설정이 preserveNullAndEmptyArrays이다
+            },  
             { $project: { //데이터를 원하는 형태로 가공한다. 값으로 들어가는 1은 보여주기 원하는 항목을 나타낸다. (_id는 숨길 수 없다)
                 title: 1,
                 author: {
@@ -64,6 +80,9 @@ router.get('/', async function(req, res){
                 },
                 views:1,
                 numId:1,
+                attachment: { $cond: [{$and: ['$attachment', {$not: '$attachment.isDeleted'}]}, true, false ]},
+                // { $cond: [조건, 조건이 참일 때 값, 조건이 거짓일 때 값] }
+                //위 조건을 푼다면, $attachment && !$attachment.isDeleted ? true:false;
                 createdAt : 1,
                 commentCount: { $size: '$comments'} //댓글의 수를 가져온다
             }}
@@ -94,7 +113,11 @@ router.get('/new', util.isLoggedin, function(req, res) {
 });
 
 //create
-router.post('/', util.isLoggedin, function(req, res){
+router.post('/', util.isLoggedin, upload.single('attachment'), async function(req, res){
+    //미들웨어 upload.single(form input name) 은 파일 하나를 form으로부터 읽어온다. 읽어온 파일은 변수 'upload'에 설정한 폴더에 저장되고그 정보가 req.file에 담긴다. 
+    var attachment = req.file?await File.createNewInstance(req.file, req.user._id):undefined; //첨부된 파일이 존재하면, file 모델의 인스턴스를 생성한다 (파일 인스턴스란, 하나의 file document를 조작할 수 있게 오브젝트로 만든 것이다)
+    req.body.attachment = attachment; //위에서 만들어진 파일 모델을 req.body.attachment에 담아서 post가 생성될 때 저장될 수 있게 한다
+
     req.body.author = req.user._id; //글을 처음 작성할 때, user의 id를 author에 기록
     Post.create(req.body, function(err, post){
         if(err) {
@@ -102,6 +125,11 @@ router.post('/', util.isLoggedin, function(req, res){
             req.flash('errors', util.parseError(err));
             return res.redirect('/posts/new'+res.locals.getPostQueryString());; //res.locals.getPostQueryString함수의 기본역할은 req.query로 전달받은 쿼리에서 page, limit을 추출해 다시 한 줄의 문자열로 만들어 반환한다.
             //이 새로운 게시물 작성에서는 무조건 쿼리스트링에 추가되는게 아니라(isAppended=false) 파라미터 전달 없이 호출한다. 
+        }
+
+        if(attachment) {//post가 생성된 후, post._id를 file.postId에 담고 DB에 저장한다
+            attachment.postId = post._id;
+            attachment.save();
         }
         //post의 route에서 redirect가 있는 경우, query string을 계속 유지하도록 해당 route로 page, limit query string을 view에서 전달해줘야 한다 
         res.redirect('/posts'+res.locals.getPostQueryString(false, {page:1, searchText:'' })); // 새글을 작성한 후 무조건 첫번째 page를 보여주도록 overwrite를 해준다. 
@@ -119,9 +147,10 @@ router.post('/', util.isLoggedin, function(req, res){
 router.get('/:id', function(req, res){
     var commentForm = req.flash('commentForm')[0] || {_id: null, form: {}};
     var commentError = req.flash('commentError')[0] || {_id:null, parentComment:null, errors:{}};
-
+    
+    //populate로 File.attachment가 하위 객체로 생성, 삭제되지 않은 파일만 생성한다
     Promise.all([
-        Post.findOne({_id:req.params.id}).populate({path:'author', select:'username'}),
+        Post.findOne({_id:req.params.id}).populate({path:'author', select:'username'}).populate({path:'attachment', match:{isDeleted:false}}),
         Comment.find({post:req.params.id}).sort('createdAt').populate({path:'author', select:'username'})
     ])
     .then(([post, comments]) => {// comment 모델을 tree 구조로 변환하고 post show view에 전달한다.
@@ -140,8 +169,10 @@ router.get('/:id/edit', util.isLoggedin, checkPermission, function(req, res){
     var post = req.flash('post')[0];
     var errors = req.flash('errors')[0] || {};
 
-    if ( !post ) {
-        Post.findOne({_id: req.params.id}, function(err, post){
+    if ( !post ) {//1
+        Post.findOne({_id: req.params.id})
+        .populate({path:'attachment', match:{isDeleted:false}})
+        .exec(function(err, post){
             if(err) return res.json(err);
             res.render('posts/edit', {post:post, errors:errors })
         });
@@ -152,7 +183,15 @@ router.get('/:id/edit', util.isLoggedin, checkPermission, function(req, res){
 });
 
 //update
-router.put('/:id', util.isLoggedin, checkPermission, function(req, res){
+router.put('/:id', util.isLoggedin, checkPermission, upload.single('newAttachment'), async function(req, res){
+    var post = await Post.findOne({_id:req.params.id})
+    .populate({path:'attachment', match:{isDeleted:false}});//첨부파일의 비교를 위해 기존의 post를 불러온다
+
+    if(post.attachment && (req.file || !req.body.attachment)) {//edit 전 첨부파일이 존재했지만, 현재 multer를 통해 req.file이 생성됐거나 form body의 attachmen가 없다며 함수 호출
+        post.attachment.processDelete();
+    }
+
+    req.body.attachment = req.file?await File.createNewInstance(req.file, req.user._id, req.params.id):post.attachment; //새로운 인스턴스 생성
     req.body.updatedAt = Date.now();
     Post.findOneAndUpdate({_id:req.params.id}, req.body, {runValidators:true}, function(err, post){//findOneAndUpdate는 기본설정이 스키마에 있는 validation을 작동하지 않도록 돼있기 때문에 작동하게 해줘야 한다. 
         if(err) {

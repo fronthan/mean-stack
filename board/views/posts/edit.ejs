@@ -24,7 +24,7 @@
             </ol>
         </nav>
 
-        <form action="/posts/<%= post._id%>?_method=put<%= getPostQueryString(true) %>" method="post">
+        <form action="/posts/<%= post._id%>?_method=put<%= getPostQueryString(true) %>" enctype="multipart/form-data" method="post">
             <div class="form-group">
                 <label for="title">제목</label>
                 <input type="text" id="title" name="title" value="<%= post.title %>" class="form-control <%= (errors.title)?'is-invalid':'' %>">
@@ -34,7 +34,22 @@
             </div>
 
             <div class="form-group">
-                <label for="body">Body</label>
+                <label for="title">첨부파일</label>
+                <input type="hidden" name="attachment" id="attachment" value="<%= post.attachment?post.attachment._id:'' %>">
+               
+                <% if(post.attachment) { %>
+                    <div class="input-group mb-3" id="currentAttachment">
+                        <input type="text" class="form-control" value="<%= post.attachment.originalFileName %>" readonly />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" onclick="$('#attachment').val(''); $('#currentAttachment').hide(); $('#newAttachment').removeClass('d-none');">삭제하기</button>
+                        </div>
+                    </div>
+                <% }%>
+                <input type="file" name="newAttachment" id="newAttachment" class="form-control-file <%= post.attachment?'d-none':'' %>">
+            </div>
+
+            <div class="form-group">
+                <label for="body">본문</label>
                 <textarea name="body" id="body" rows="5" class="form-control <%= (errors.body)?'is-invalid':'' %>"><%= post.body %></textarea>
                 <% if(errors.body){ %>
                     <span class="invalid-feedback"><%= errors.body.message %></span>
@@ -48,7 +63,7 @@
             <% } %>
 
             <div>
-                <a href="/posts<%= getPostQueryString() %>" class="btn btn-primary">뒤로가기</a>
+                <a href="/posts/<%= post._id %><%= getPostQueryString() %>" class="btn btn-primary">뒤로가기</a>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
         </form>

@@ -21,13 +21,23 @@
             </ol>
         </nav>
 
-        <form action="/posts<%= getPostQueryString() %>" method="post">
+        <form action="/posts<%= getPostQueryString() %>" enctype="multipart/form-data" method="post">
+            <!-- 파일은 실제로 DB에 저장되는 게 아니라 서버에 저장된다.
+                * file 모델에 업로드된 파일의 정보를 저장하고, 이 정보를 이용해 서버에서 파일을 찾을 수 있게 한다.
+                * 그래서 필요한 enctype="multipart/form-data"
+                * 하지만 input:file 은 서버의 body-parser로 parse되지 않아 multer package로 파일을 읽어와야 한다 -->
             <div class="form-group">
                 <label for="title">제목</label>
                 <input type="text" id="title" name="title" value="<%= post.title %>" class="form-control <%= (errors.title)?'is-invalid':'' %>">
                 <% if(errors.title){ %>
                     <span class="invalid-feedback"><%= errors.title.message %></span>
                 <% } %>
+            </div>
+
+            <div class="form-group">
+                <label for="attachment">첨부파일</label>
+                <input type="file" name="attachment" id="attachment" class="form-control-file">
+                <!-- input file name 값으로 서버에서 접근하게 된다 -->
             </div>
 
             <div class="form-group">
