@@ -1,12 +1,33 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
+
+function testMiddleware(req, res, next) {
+
+  console.log('첫번재 미들웨어');
+  next();
+
+}
+
+// function loginRequired(req, res, next) {
+//   if() {
+
+//   } else {
+//     next();
+//   }
+// }
+
+router.get('/', testMiddleware, (req, res) => {
   res.send("어드민 이ㅜㅎurl");
 });
 
 router.get('/products', (req, res) => {
-  res.send("어드민 proectsl");
+  //res.send("어드민 proectsl");
+
+  res.render('admin/products.html', {
+    message: 'hello!!!!',
+    online:'express'
+  } )
 });
 
 module.exports = router;
