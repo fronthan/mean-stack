@@ -1,3 +1,4 @@
+//초보자용 방식 (?
 const express = require('express');
 const nunjucks = require('nunjucks');
 const logger = require('morgan');
