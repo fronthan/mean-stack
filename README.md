@@ -16,7 +16,9 @@
 <br>
 
 ### FastCampus Node 웹 프로그래밍 올인원 패키지 Online 공부
-[강의 깃헙1](https://github.com/parkjunyoung/fc-javascript)<br>
+[강의 깃헙1 javascript](https://github.com/parkjunyoung/fc-javascript)<br>
 -2021.06.21 시작<br>
-[강의 깃헙2](https://github.com/parkjunyoung/express-online)<br>
+[강의 깃헙2 express](https://github.com/parkjunyoung/express-online)<br>
 -2021.07.06 시작<br>
+[강의 깃헙3 Sequelize](https://github.com/parkjunyoung/sequelize-crud)<br>
+-2021.07.18 시작<br>
